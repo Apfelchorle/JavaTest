@@ -11,11 +11,18 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Set up SSH
-RUN mkdir -p /run/sshd
-RUN echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
+RUN mkdir -p /run/sshd /root/.ssh
+RUN chmod 700 /root/.ssh
 
-# Create root password (change this)
-RUN echo 'root:password' | chpasswd
+# Configure SSH for key-based authentication
+RUN echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
+RUN echo "PubkeyAuthentication yes" >> /etc/ssh/sshd_config
+RUN echo "PasswordAuthentication no" >> /etc/ssh/sshd_config
+
+# Copy your public SSH key into the container
+# Replace with your actual public key
+COPY id_rsa.pub /root/.ssh/authorized_keys
+RUN chmod 600 /root/.ssh/authorized_keys
 
 # Expose SSH port
 EXPOSE 22
